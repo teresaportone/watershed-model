@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 from ipywidgets import interact, FloatSlider
+from IPython.display import HTML
 
 class WatershedModel:
     def __init__(self):
@@ -26,7 +28,7 @@ class WatershedModel:
         J, K = np.meshgrid(ijx,iky)
         self.diffusion = -self.nu * (J**2 + K**2)
 
-    def run_simulation(self, t, source_mitigation, sink_rate):
+    def run_simulation(self, t, source_mitigation=0.0, sink_rate=0.0):
         IChat = np.fft.fft2(self.IC*(1-source_mitigation))
         chat_nm = self.IChat_nm * np.exp(t * self.diffusion)
         chat = IChat * np.exp(t * (self.diffusion - sink_rate))
@@ -48,9 +50,30 @@ class WatershedModel:
         ax.set_yticks([])
         fig.tight_layout()
         
-    def animate_simulation(self):
+    def interactive_simulation(self):
         @interact(source_mitigation=FloatSlider(description="Source removal", min=0, max=1, step=0.1, value=0.0, style=dict(description_width='initial')),
                   sink_rate=FloatSlider(description="Soil treatment", min=0, max=1, step=0.1, value=0.0, style=dict(description_width='initial')))
         def plot_animation(source_mitigation, sink_rate):
             C = self.run_simulation(1, source_mitigation, sink_rate)
             self.plot_concentration(C)
+
+    def simulation_movie(self):
+        fig, ax = plt.subplots(figsize=(4, 3))
+
+        C = self.run_simulation(1)
+        im = ax.imshow(self.IC, cmap='Greys')#, vmin=0, vmax=self.IC.max(), cmap='Greys', origin='lower')
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_title('Time: 0')
+        fig.tight_layout()
+
+        def update(t):
+            C = self.run_simulation(t)
+            im.set_array(C)
+            im.set_clim(vmin=0, vmax=np.max(C))
+            ax.set_title(f'{365*t:.0f} days')
+            return im,
+
+        ani = FuncAnimation(fig, update, frames=np.linspace(0, 1, 100), interval=80, blit=True)
+        plt.close()  # Prevent double display in Jupyter Notebook
+        return HTML(ani.to_jshtml())
