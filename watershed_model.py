@@ -44,18 +44,18 @@ class WatershedModel:
         if C is None: C = self.c
         fig = plt.figure(figsize=(4,3))
         ax = fig.add_subplot(111)
-        ax.imshow(C, vmin=0, vmax=self.c_nm.max(), cmap='Greys', origin='lower')
-        ax.annotate(f"{100*(1-self.get_total_contaminant(C)):.0f}% removed", (0.02,0.97), xycoords='axes fraction', va='top')
+        ax.imshow(C, vmin=0, vmax=self.c_nm.max(), cmap='inferno', origin='lower')
+        ax.annotate(f"{100*(1-self.get_total_contaminant(C)):.0f}% removed", (0.02,0.97), xycoords='axes fraction', va='top', color='white')
 
         if not source_mitigation is None:
             sm_cost = source_mitigation*1e7
             sr_cost = sink_rate*5e6
             total_cost = sm_cost + sr_cost
             budget=3e6
-            ax.annotate(f"Budget: ${budget:,.0f}", (0.02, 0.87), xycoords='axes fraction', va='top')
-            ax.annotate("Total cost:", (0.02, 0.78), xycoords='axes fraction', va='top')
+            ax.annotate(f"Budget: ${budget:,.0f}", (0.02, 0.87), xycoords='axes fraction', va='top', color='white')
+            ax.annotate("Total cost:", (0.02, 0.78), xycoords='axes fraction', va='top', color='white')
             if total_cost <= budget:
-                ax.annotate(f"${total_cost:,.0f}", (0.22, 0.78), xycoords='axes fraction', va='top')
+                ax.annotate(f"${total_cost:,.0f}", (0.22, 0.78), xycoords='axes fraction', va='top', color='white')
             else:
                 ax.annotate(f"${total_cost:,.0f}", (0.22, 0.78), xycoords='axes fraction', va='top', color='red')
 
@@ -75,7 +75,7 @@ class WatershedModel:
 
         ax.set_title("Contamination Spreading in a Watershed")
         C = self.run_simulation(1)
-        im = ax.imshow(self.IC, cmap='Greys')#, vmin=0, vmax=self.IC.max(), cmap='Greys', origin='lower')
+        im = ax.imshow(self.IC, cmap='inferno')
         ax.set_xticks([])
         ax.set_yticks([])
         time_text = ax.annotate('0 days', (0.02, 0.97), xycoords='axes fraction', va='top')
@@ -90,4 +90,6 @@ class WatershedModel:
 
         ani = FuncAnimation(fig, update, frames=np.linspace(0, 1, 100), interval=80, blit=True)
         plt.close()  # Prevent double display in Jupyter Notebook
-        return HTML(ani.to_jshtml())
+        return ani
+
+        #return HTML(ani.to_jshtml())
