@@ -45,7 +45,7 @@ class WatershedModel:
         fig = plt.figure(figsize=(4,3))
         ax = fig.add_subplot(111)
         ax.imshow(C, vmin=0, vmax=self.c_nm.max(), cmap='inferno', origin='lower')
-        ax.annotate(f"{100*(1-self.get_total_contaminant(C)):.0f}% removed", (0.02,0.97), xycoords='axes fraction', va='top', color='white')
+        ax.annotate(f"{100*(1-self.get_total_contaminant(C)):.0f}% reduced", (0.02,0.97), xycoords='axes fraction', va='top', color='white')
 
         if not source_mitigation is None:
             sm_cost = source_mitigation*1e7
@@ -64,8 +64,8 @@ class WatershedModel:
         fig.tight_layout()
         
     def interactive_simulation(self):
-        @interact(source_mitigation=FloatSlider(description="Source removal", min=0, max=1, step=0.1, value=0.0, style=dict(description_width='initial')),
-                  sink_rate=FloatSlider(description="Soil treatment", min=0, max=1, step=0.1, value=0.0, style=dict(description_width='initial')))
+        @interact(source_mitigation=FloatSlider(description="Decrease source", min=0, max=1, step=0.1, value=0.0, style=dict(description_width='initial')),
+                  sink_rate=FloatSlider(description="Remove from soil", min=0, max=1, step=0.1, value=0.0, style=dict(description_width='initial')))
         def plot_animation(source_mitigation, sink_rate):
             C = self.run_simulation(1, source_mitigation, sink_rate)
             self.plot_concentration(C, source_mitigation, sink_rate)
